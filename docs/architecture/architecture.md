@@ -102,3 +102,34 @@ not a claim that graceful draining is already implemented.
   lost.
 - Verify the worker stops claiming new jobs during shutdown.
 - Record observed shutdown duration and retry behavior.
+
+## 10. Local HPA Validation Evidence
+
+Date: 2026-10-14
+
+### Test environment
+
+- Kubernetes: local kind cluster `devops-platform`.
+- Metrics Server: running; Metrics API available.
+- Test workload: temporary NGINX Deployment in namespace `hpa-test`.
+- HPA target: 50% average CPU utilization.
+- Configured replica range: 1 to 3.
+- CPU requests: 100m per NGINX pod.
+
+### Observed results
+
+- The HPA successfully retrieved CPU utilization metrics.
+- A `SuccessfulRescale` event reported scaling because CPU utilization
+  was above the configured target.
+- The Deployment scaled from 1 to 2 replicas and later reached 3 replicas.
+- At the final observation, the HPA reported 60% CPU utilization against
+  a 50% target, with 3 replicas available.
+- The temporary `hpa-test` namespace was subsequently deleted.
+
+### Limitations
+
+This validates basic CPU-based HPA operation in the local kind cluster.
+The workload was NGINX, not the supplied black-box application. This test
+does not establish application throughput, 15x peak-load capacity, scaling
+within five minutes under representative traffic, or production-cloud
+behavior. Those requirements remain unverified.
