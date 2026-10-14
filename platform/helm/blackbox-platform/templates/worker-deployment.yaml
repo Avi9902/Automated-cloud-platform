@@ -25,7 +25,7 @@ spec:
         app.kubernetes.io/component: worker
         app.kubernetes.io/part-of: cloud-agnostic-platform
     spec:
-      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.workerTerminationGracePeriodSeconds }}
       containers:
         - name: worker
           image: "{{ required "worker.image.repository must be set" .Values.worker.image.repository }}:{{ required "worker.image.tag must be set" .Values.worker.image.tag }}"

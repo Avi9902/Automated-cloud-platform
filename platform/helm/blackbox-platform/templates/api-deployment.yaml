@@ -25,7 +25,7 @@ spec:
         app.kubernetes.io/component: api
         app.kubernetes.io/part-of: cloud-agnostic-platform
     spec:
-      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.apiTerminationGracePeriodSeconds }}
       containers:
         - name: api
           image: "{{ required "api.image.repository must be set" .Values.api.image.repository }}:{{ required "api.image.tag must be set" .Values.api.image.tag }}"

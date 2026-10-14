@@ -35,7 +35,8 @@ worker:
 service:
   type: ClusterIP
 
-terminationGracePeriodSeconds: 75
+apiTerminationGracePeriodSeconds: 75
+workerTerminationGracePeriodSeconds: 75
 
 podDisruptionBudget:
   api:
