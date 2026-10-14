@@ -1,0 +1,2 @@
+# Example only. Set this to an AWS region approved for your assignment.
+aws_region = "eu-west-1"
