@@ -34,3 +34,24 @@ variable "allowed_ingress_rules" {
     error_message = "Each ingress rule must specify exactly one source: a security group ID or an IPv4 CIDR."
   }
 }
+
+variable "allowed_egress_rules" {
+  description = "Explicit egress rules keyed by a unique rule name."
+  type = map(object({
+    description                   = string
+    from_port                     = number
+    to_port                       = number
+    protocol                      = string
+    destination_security_group_id = optional(string)
+    destination_cidr_ipv4         = optional(string)
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for rule in values(var.allowed_egress_rules) :
+      (rule.destination_security_group_id != null) != (rule.destination_cidr_ipv4 != null)
+    ])
+    error_message = "Each egress rule must specify exactly one destination: a security group ID or an IPv4 CIDR."
+  }
+}
