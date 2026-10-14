@@ -13,7 +13,7 @@ resource "aws_lb" "this" {
 }
 
 resource "aws_lb_target_group" "api" {
-  name        = substr("${var.name}-api", 0, 32)
+  name        = "${substr(var.name, 0, 27)}-api"
   port        = var.target_port
   protocol    = "HTTP"
   target_type = "ip"
