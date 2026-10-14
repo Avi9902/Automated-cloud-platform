@@ -20,3 +20,6 @@ crash.*.log
 
 # Local tooling
 .DS_Store
+
+# Terraform backend configuration with real bucket details
+infrastructure/envs/*/backend.hcl
