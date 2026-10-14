@@ -1,9 +1,10 @@
 module "resource_metadata" {
   source = "../../modules/resource_metadata"
 
-  project     = "cloud-agnostic-platform"
-  environment = "dev"
-  owner       = "platform-team"
+
+  project     = var.project_name
+  environment = var.environment
+  owner       = var.owner
 }
 
 output "common_tags" {
