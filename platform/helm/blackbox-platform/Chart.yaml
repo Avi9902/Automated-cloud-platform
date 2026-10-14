@@ -1,0 +1,6 @@
+apiVersion: v2
+name: blackbox-platform
+description: Reusable deployment chart for the assignment's black-box API and worker
+type: application
+version: 0.1.0
+appVersion: "provided-at-deployment"
