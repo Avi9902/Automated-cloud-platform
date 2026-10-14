@@ -73,3 +73,32 @@ not a claim that the complete platform has been deployed or tested.
 - Zero-downtime releases and automatic rollback under load.
 - 15x autoscaling, SLO attainment, backup restoration, and cost estimates.
 - Dedicated tenant provisioning and regional failover.
+
+## 9. Worker Graceful Shutdown Contract
+
+The worker image and its queue acknowledgment behavior have not yet been
+provided for verification. The following is the required design contract,
+not a claim that graceful draining is already implemented.
+
+1. On termination, the worker must stop accepting or claiming new jobs.
+2. It should allow an in-progress job to finish within the configured
+   termination grace period, where the queue and application semantics allow.
+3. A job that cannot finish safely must remain retryable or be returned to
+   the queue according to the actual queue's visibility, acknowledgment,
+   and retry behavior.
+4. Job processing should be idempotent or otherwise protected against
+   duplicate execution.
+5. Kubernetes termination grace periods are configurable independently for
+   the API and worker. The current worker default is 75 seconds; this value
+   alone does not guarantee safe draining.
+6. The termination sequence must be tested with a real worker image and a
+   job lasting up to 60 seconds before claiming graceful shutdown is verified.
+
+### Required validation evidence
+
+- Confirm how the worker handles SIGTERM.
+- Confirm when jobs are acknowledged and how failed or interrupted jobs retry.
+- Terminate a worker during a long-running job and verify no job is silently
+  lost.
+- Verify the worker stops claiming new jobs during shutdown.
+- Record observed shutdown duration and retry behavior.
