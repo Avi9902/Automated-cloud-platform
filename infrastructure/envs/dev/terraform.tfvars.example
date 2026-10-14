@@ -1,2 +1,4 @@
-# Example only. Set this to an AWS region approved for your assignment.
-aws_region = "eu-west-1"
+aws_region  = "ap-southeast-2"
+project_name = "cloud-agnostic-platform"
+environment  = "dev"
+owner        = "platform-team"
