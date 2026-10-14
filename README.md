@@ -36,3 +36,19 @@ The application is treated as a black box. Its implementation will not be rewrit
 This repository is under development. Features will be marked complete only
 after implementation and verification. Architecture plans and untested
 configurations are not evidence of a successful deployment.
+
+## Local Helm Validation
+
+Prerequisites: Helm 3 and a shell environment with the repository checked out.
+
+Run the chart validation script from the repository root:
+
+    ./platform/scripts/validate-helm.sh
+
+The script lints the Helm chart and renders Kubernetes resources using
+placeholder API and worker image references. It checks that seven resources,
+including two HorizontalPodAutoscalers, are rendered.
+
+This is configuration validation only. It does not deploy the application,
+verify real image availability, prove autoscaling behavior, or establish
+zero-downtime releases.
