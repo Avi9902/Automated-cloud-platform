@@ -36,3 +36,11 @@ service:
   type: ClusterIP
 
 terminationGracePeriodSeconds: 75
+
+podDisruptionBudget:
+  api:
+    enabled: true
+    minAvailable: 1
+  worker:
+    enabled: true
+    minAvailable: 1
