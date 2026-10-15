@@ -13,6 +13,9 @@ DB_PASSWORD = os.environ["POSTGRES_PASSWORD"]
 
 MIGRATIONS_DIR = pathlib.Path("/migrations")
 
+# A fixed, application-specific PostgreSQL advisory-lock key.
+MIGRATION_LOCK_KEY = 741852963
+
 
 def connect_with_retry():
     for attempt in range(30):
@@ -37,8 +40,16 @@ def main():
     if not files:
         raise RuntimeError("No versioned migration files found")
 
+    # Closing the connection releases the session-level advisory lock.
     with connect_with_retry() as conn:
         with conn.cursor() as cur:
+            print("Waiting for PostgreSQL migration lock...", flush=True)
+            cur.execute(
+                "SELECT pg_advisory_lock(%s)",
+                (MIGRATION_LOCK_KEY,),
+            )
+            print("Migration lock acquired.", flush=True)
+
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS schema_migrations (
                     version VARCHAR(100) PRIMARY KEY,
@@ -48,7 +59,13 @@ def main():
             """)
 
             for path in files:
-                version, description = path.stem.split("__", 1)
+                parts = path.stem.split("__", 1)
+                if len(parts) != 2 or not parts[0] or not parts[1]:
+                    raise RuntimeError(
+                        f"Invalid migration filename: {path.name}"
+                    )
+
+                version, description = parts
 
                 cur.execute(
                     "SELECT 1 FROM schema_migrations WHERE version = %s",
@@ -61,19 +78,27 @@ def main():
                 sql = path.read_text()
                 print(f"Applying migration: {version}", flush=True)
 
-                # Each migration and its version record commit together.
+                # Migration SQL and its history record commit together.
                 with conn.transaction():
                     with conn.cursor() as migration_cur:
                         migration_cur.execute(sql)
                         migration_cur.execute(
                             """
-                            INSERT INTO schema_migrations (version, description)
+                            INSERT INTO schema_migrations
+                                (version, description)
                             VALUES (%s, %s)
                             """,
                             (version, description.replace("_", " ")),
                         )
 
                 print(f"Applied migration: {version}", flush=True)
+
+            # Unlock explicitly before the connection closes.
+            cur.execute(
+                "SELECT pg_advisory_unlock(%s)",
+                (MIGRATION_LOCK_KEY,),
+            )
+            print("Migration lock released.", flush=True)
 
     print("Database migrations completed successfully", flush=True)
 
