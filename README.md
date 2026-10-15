@@ -54,3 +54,5 @@ verify real image availability, prove autoscaling behavior, or establish
 zero-downtime releases.
 
 Jenkins polling validation test.
+
+CI/CD validation is automated through Jenkins, with GitHub Actions providing additional repository checks.
