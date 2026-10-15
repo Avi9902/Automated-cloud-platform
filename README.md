@@ -52,3 +52,5 @@ including two HorizontalPodAutoscalers, are rendered.
 This is configuration validation only. It does not deploy the application,
 verify real image availability, prove autoscaling behavior, or establish
 zero-downtime releases.
+
+Jenkins polling validation test.
