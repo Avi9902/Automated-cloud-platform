@@ -11,8 +11,7 @@ spec:
   replicas: {{ .Values.api.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: api
+      app: platform-api
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -21,8 +20,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: api
+        app: platform-api
         app.kubernetes.io/part-of: cloud-agnostic-platform
     spec:
       terminationGracePeriodSeconds: {{ .Values.apiTerminationGracePeriodSeconds }}
@@ -30,6 +28,11 @@ spec:
         - name: api
           image: "{{ required "api.image.repository must be set" .Values.api.image.repository }}:{{ required "api.image.tag must be set" .Values.api.image.tag }}"
           imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          env:
+            {{- range $name, $value := .Values.api.env }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.api.containerPort }}

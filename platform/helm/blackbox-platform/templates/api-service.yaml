@@ -9,8 +9,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: api
+    app: platform-api
   ports:
     - name: http
       port: 8080

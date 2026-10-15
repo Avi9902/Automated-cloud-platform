@@ -1,14 +1,19 @@
 nameOverride: ""
-fullnameOverride: ""
+fullnameOverride: "platform"
 
 api:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
   image:
-    repository: ""
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: platform-api
+    tag: dev
+    pullPolicy: Never
   containerPort: 8080
+  env:
+    REDIS_HOST: redis
+    REDIS_PORT: "6379"
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: "5432"
   resources:
     requests:
       cpu: 100m
@@ -19,11 +24,15 @@ api:
 
 worker:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
   image:
-    repository: ""
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: platform-worker
+    tag: reliable
+    pullPolicy: Never
+  env:
+    REDIS_HOST: redis
+    REDIS_PORT: "6379"
+    QUEUE_NAME: platform-jobs
   resources:
     requests:
       cpu: 100m
@@ -40,20 +49,20 @@ workerTerminationGracePeriodSeconds: 75
 
 podDisruptionBudget:
   api:
-    enabled: true
+    enabled: false
     minAvailable: 1
   worker:
-    enabled: true
+    enabled: false
     minAvailable: 1
 
 autoscaling:
   api:
     enabled: false
-    minReplicas: 2
+    minReplicas: 1
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
   worker:
     enabled: false
-    minReplicas: 2
+    minReplicas: 1
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
