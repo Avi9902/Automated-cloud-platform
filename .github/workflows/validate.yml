@@ -1,0 +1,55 @@
+name: Validate Platform Configuration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive infrastructure
+
+      - name: Initialize Terraform without remote backend
+        run: terraform -chdir=infrastructure/envs/dev init -backend=false -input=false
+
+      - name: Validate Terraform
+        run: terraform -chdir=infrastructure/envs/dev validate
+
+  helm:
+    name: Helm chart validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint Helm chart
+        run: helm lint platform/helm/blackbox-platform
+
+      - name: Render Helm templates
+        run: |
+          helm template platform platform/helm/blackbox-platform \
+            --namespace platform-dev \
+            --set api.image.repository=example/api \
+            --set api.image.tag=ci \
+            --set worker.image.repository=example/worker \
+            --set worker.image.tag=ci
