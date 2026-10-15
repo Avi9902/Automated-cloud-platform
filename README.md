@@ -2,57 +2,89 @@
 
 ## Objective
 
-Build an automated deployment platform that supports cloud infrastructure
-and a local Kubernetes target, zero-downtime application releases,
-autoscaling, tenant isolation, and operational monitoring.
+Build an automated deployment platform supporting cloud infrastructure and
+local Kubernetes, tenant environments, application health checks, job
+processing, autoscaling, and operational monitoring.
 
 ## Architecture Layers
 
-- Infrastructure: provider-specific provisioning and reusable Terraform modules.
-- Platform: Kubernetes, Helm, policies, and platform automation.
-- Applications: deployment configuration for the supplied black-box API and worker.
-- CI/CD: Jenkins pipelines for build, test, security scanning, image signing, promotion, and deployment. Implementation and verification are pending.
-- Tenants: configuration for shared and dedicated tenant environments.
-- Documentation: architecture, runbooks, recovery procedures, and evidence.
+- Infrastructure: Terraform configuration and reusable infrastructure modules.
+- Platform: Kubernetes manifests, Helm charts, and deployment automation.
+- Applications: API and background worker containers.
+- Data services: Redis job queue and PostgreSQL database.
+- CI/CD: Jenkins pipeline for Terraform and Helm validation.
+- Tenants: Shared and dedicated environment support is planned.
+- Documentation: Architecture, deployment instructions, and operational runbooks.
 
 ## Deployment Targets
 
-- Local Kubernetes: kind running on the EC2 development instance.
-- Cloud Kubernetes: planned; not yet provisioned.
+- Local Kubernetes: Kind cluster named `devops-platform` on the development EC2 instance.
+- Cloud Kubernetes: Not yet provisioned through Terraform.
 
 ## Application Contract
 
 - API port: 8080
-- Health endpoint: /healthz
-- Readiness endpoint: /readyz
-- Metrics endpoint: /metrics
-- Worker: consumes jobs from Redis; jobs may run for up to 60 seconds.
-- Data services: PostgreSQL and Redis.
+- Liveness endpoint: `/healthz`
+- Readiness endpoint: `/readyz`
+- Metrics endpoint: `/metrics`
+- Worker: Consumes jobs from the Redis `platform-jobs` queue.
+- Database: PostgreSQL.
+- Queue: Redis.
 
-The application is treated as a black box. Its implementation will not be rewritten.
+## Implemented and Verified
 
-## Delivery Status
+- API container image built and loaded into the Kind cluster.
+- API Kubernetes Deployment and ClusterIP Service.
+- API health, readiness, and metrics endpoints.
+- API readiness check confirms TCP connectivity to Redis and PostgreSQL.
+- Background worker deployed to Kubernetes.
+- Redis Deployment and ClusterIP Service.
+- PostgreSQL Deployment, ClusterIP Service, Secret reference, and persistent volume claim.
+- Redis queue job test performed during local development.
+- Jenkins pipeline validates Terraform formatting and configuration.
+- Jenkins pipeline runs Helm lint and Helm template validation.
+- Latest reported Jenkins build completed with `Finished: SUCCESS`.
 
-This repository is under development. Features will be marked complete only
-after implementation and verification. Architecture plans and untested
-configurations are not evidence of a successful deployment.
+## CI/CD Validation
+
+The Jenkins pipeline validates the repository's Terraform and Helm
+configuration. The Helm lint output may recommend adding a chart icon; this
+is informational and does not cause validation to fail.
+
+The pipeline's successful result proves configuration validation passed.
+It does not prove that Terraform has provisioned cloud infrastructure,
+that images have been published to a registry, or that a production
+deployment has occurred.
+
+## Known Gaps and Limitations
+
+- Cloud infrastructure has not yet been provisioned through Terraform.
+- Automated image build and registry publishing in Jenkins are not yet verified.
+- Security scanning, image signing, promotion, and automated deployment are not
+  yet verified as implemented.
+- Database startup migrations are not yet implemented or verified.
+- The worker currently uses a simple Redis list consumer; durable job
+  acknowledgements and retry/dead-letter handling are not implemented.
+- Redis persistence and high availability are not configured.
+- Kubernetes autoscaling configuration may be rendered by Helm, but actual
+  scaling behavior has not been verified.
+- Tenant isolation, availability targets, load testing, and zero-downtime
+  releases remain to be implemented and/or tested.
+- Monitoring integration and alerting require further verification.
 
 ## Local Helm Validation
 
-Prerequisites: Helm 3 and a shell environment with the repository checked out.
-
-Run the chart validation script from the repository root:
+From the repository root, run:
 
     ./platform/scripts/validate-helm.sh
 
-The script lints the Helm chart and renders Kubernetes resources using
-placeholder API and worker image references. It checks that seven resources,
-including two HorizontalPodAutoscalers, are rendered.
+This lints the Helm chart and renders Kubernetes resources with placeholder
+API and worker image references. It validates configuration only; it does
+not deploy those resources or prove runtime behavior.
 
-This is configuration validation only. It does not deploy the application,
-verify real image availability, prove autoscaling behavior, or establish
-zero-downtime releases.
+## Development Status
 
-Jenkins polling validation test.
-
-CI/CD validation is automated through Jenkins, with GitHub Actions providing additional repository checks.
+This repository is under active development. Features are marked complete
+only when implementation and verification evidence are available. Local Kind
+testing and Jenkins configuration validation do not, by themselves, establish
+production readiness.
