@@ -196,3 +196,12 @@ The Jenkins pipeline validates Terraform and Helm configuration and performs the
 The latest reported pipeline execution completed with `Finished: SUCCESS`.
 The successful build verifies the implemented development pipeline. It does not prove that cloud infrastructure has been provisioned through Terraform, that images have been published to a remote registry, or that a production deployment has occurred.
 
+
+---
+
+## Implementation and Troubleshooting Report
+
+See [Assignment Implementation and Troubleshooting Report](docs/assignment-implementation-log.md)
+for the implementation summary, monitoring setup, validation commands,
+troubleshooting history, security considerations, and remaining verification
+items.
